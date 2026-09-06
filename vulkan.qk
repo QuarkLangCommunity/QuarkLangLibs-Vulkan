@@ -1,0 +1,56 @@
+/* QuarkLang 官方库：vulkan —— Vulkan 图形 API 绑定（官方认证）
+ *
+ * library vulkan { ... } 声明集：直接调用系统 Vulkan 导出符号（跨系统：
+ * Linux: libvulkan.so.1；macOS: libvulkan.dylib；Windows: vulkan-1.dll）。
+ * 运行时跨系统加载（dlopen/LoadLibrary）经 libffi 调用。
+ *
+ * 类型映射：int=uint32_t/VkResult；f32=float；String=const char*；
+ * 指针参数（VkInstance/VkDevice 等句柄）v1 以 String 十六进制句柄传递。
+ */
+program library;
+
+library vulkan {
+    // ---- 实例（前六层） ----
+    fn vkCreateInstance(pCreateInfo String, pAllocator String, pInstance String) int;
+    fn vkDestroyInstance(instance String, pAllocator String) void;
+    fn vkEnumerateInstanceExtensionProperties(pLayerName String, pCount String, pProperties String) int;
+    fn vkEnumerateInstanceLayerProperties(pCount String, pProperties String) int;
+
+    // ---- 物理设备枚举 ----
+    fn vkEnumeratePhysicalDevices(instance String, pCount String, pDevices String) int;
+    fn vkGetPhysicalDeviceProperties(device String, pProperties String) void;
+    fn vkGetPhysicalDeviceFeatures(device String, pFeatures String) void;
+    fn vkGetPhysicalDeviceQueueFamilyProperties(device String, pCount String, pProperties String) void;
+    fn vkEnumerateDeviceExtensionProperties(device String, pLayerName String, pCount String, pProperties String) int;
+
+    // ---- 逻辑设备/队列 ----
+    fn vkCreateDevice(physicalDevice String, pCreateInfo String, pAllocator String, pDevice String) int;
+    fn vkDestroyDevice(device String, pAllocator String) void;
+    fn vkGetDeviceQueue(device String, queueFamily int, queueIndex int, pQueue String) void;
+    fn vkDeviceWaitIdle(device String) int;
+
+    // ---- 交换链/渲染 ----
+    fn vkCreateSwapchainKHR(device String, pCreateInfo String, pAllocator String, pSwapchain String) int;
+    fn vkAcquireNextImageKHR(device String, swapchain String, timeout long, semaphore String, fence String, pImageIndex String) int;
+    fn vkQueuePresentKHR(queue String, pPresentInfo String) int;
+    fn vkQueueSubmit(queue String, submitCount int, pSubmits String, fence String) int;
+
+    // ---- 内存/缓冲 ----
+    fn vkAllocateMemory(device String, pAllocateInfo String, pAllocator String, pMemory String) int;
+    fn vkFreeMemory(device String, memory String, pAllocator String) void;
+    fn vkMapMemory(device String, memory String, offset long, size long, flags int, ppData String) int;
+    fn vkCreateBuffer(device String, pCreateInfo String, pAllocator String, pBuffer String) int;
+    fn vkCreateImageView(device String, pCreateInfo String, pAllocator String, pImageView String) int;
+
+    // ---- 查询 ----
+    fn vkGetInstanceProcAddr(instance String, pName String) long;
+} vulkan;
+
+space {
+    // 常用 VkResult 判定（>=0 为成功）
+    fn SUCCESS() int { return 0; }
+    fn INCOMPLETE() int { return 5; }
+    fn ERROR_OUT_OF_DATE_KHR() int { return -1000001004; }
+    fn ERROR_INCOMPATIBLE_DRIVER() int { return -1000001001; }
+    fn ERROR_NOT_READY() int { return -1000001005; }
+} (vk);

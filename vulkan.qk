@@ -11,40 +11,40 @@ program library;
 
 library vulkan {
     // ---- 实例（前六层） ----
-    fn vkCreateInstance(pCreateInfo String, pAllocator String, pInstance String) int;
-    fn vkDestroyInstance(instance String, pAllocator String) void;
-    fn vkEnumerateInstanceExtensionProperties(pLayerName String, pCount String, pProperties String) int;
-    fn vkEnumerateInstanceLayerProperties(pCount String, pProperties String) int;
+    fn vkCreateInstance(String pCreateInfo, String pAllocator, String pInstance) int;
+    fn vkDestroyInstance(String instance, String pAllocator) void;
+    fn vkEnumerateInstanceExtensionProperties(String pLayerName, String pCount, String pProperties) int;
+    fn vkEnumerateInstanceLayerProperties(String pCount, String pProperties) int;
 
     // ---- 物理设备枚举 ----
-    fn vkEnumeratePhysicalDevices(instance String, pCount String, pDevices String) int;
-    fn vkGetPhysicalDeviceProperties(device String, pProperties String) void;
-    fn vkGetPhysicalDeviceFeatures(device String, pFeatures String) void;
-    fn vkGetPhysicalDeviceQueueFamilyProperties(device String, pCount String, pProperties String) void;
-    fn vkEnumerateDeviceExtensionProperties(device String, pLayerName String, pCount String, pProperties String) int;
+    fn vkEnumeratePhysicalDevices(String instance, String pCount, String pDevices) int;
+    fn vkGetPhysicalDeviceProperties(String device, String pProperties) void;
+    fn vkGetPhysicalDeviceFeatures(String device, String pFeatures) void;
+    fn vkGetPhysicalDeviceQueueFamilyProperties(String device, String pCount, String pProperties) void;
+    fn vkEnumerateDeviceExtensionProperties(String device, String pLayerName, String pCount, String pProperties) int;
 
     // ---- 逻辑设备/队列 ----
-    fn vkCreateDevice(physicalDevice String, pCreateInfo String, pAllocator String, pDevice String) int;
-    fn vkDestroyDevice(device String, pAllocator String) void;
-    fn vkGetDeviceQueue(device String, queueFamily int, queueIndex int, pQueue String) void;
-    fn vkDeviceWaitIdle(device String) int;
+    fn vkCreateDevice(String physicalDevice, String pCreateInfo, String pAllocator, String pDevice) int;
+    fn vkDestroyDevice(String device, String pAllocator) void;
+    fn vkGetDeviceQueue(String device, int queueFamily, int queueIndex, String pQueue) void;
+    fn vkDeviceWaitIdle(String device) int;
 
     // ---- 交换链/渲染 ----
-    fn vkCreateSwapchainKHR(device String, pCreateInfo String, pAllocator String, pSwapchain String) int;
-    fn vkAcquireNextImageKHR(device String, swapchain String, timeout long, semaphore String, fence String, pImageIndex String) int;
-    fn vkQueuePresentKHR(queue String, pPresentInfo String) int;
-    fn vkQueueSubmit(queue String, submitCount int, pSubmits String, fence String) int;
+    fn vkCreateSwapchainKHR(String device, String pCreateInfo, String pAllocator, String pSwapchain) int;
+    fn vkAcquireNextImageKHR(String device, String swapchain, long timeout, String semaphore, String fence, String pImageIndex) int;
+    fn vkQueuePresentKHR(String queue, String pPresentInfo) int;
+    fn vkQueueSubmit(String queue, int submitCount, String pSubmits, String fence) int;
 
     // ---- 内存/缓冲 ----
-    fn vkAllocateMemory(device String, pAllocateInfo String, pAllocator String, pMemory String) int;
-    fn vkFreeMemory(device String, memory String, pAllocator String) void;
-    fn vkMapMemory(device String, memory String, offset long, size long, flags int, ppData String) int;
-    fn vkCreateBuffer(device String, pCreateInfo String, pAllocator String, pBuffer String) int;
-    fn vkCreateImageView(device String, pCreateInfo String, pAllocator String, pImageView String) int;
+    fn vkAllocateMemory(String device, String pAllocateInfo, String pAllocator, String pMemory) int;
+    fn vkFreeMemory(String device, String memory, String pAllocator) void;
+    fn vkMapMemory(String device, String memory, long offset, long size, int flags, String ppData) int;
+    fn vkCreateBuffer(String device, String pCreateInfo, String pAllocator, String pBuffer) int;
+    fn vkCreateImageView(String device, String pCreateInfo, String pAllocator, String pImageView) int;
 
     // ---- 查询 ----
-    fn vkGetInstanceProcAddr(instance String, pName String) long;
-} vulkan;
+    fn vkGetInstanceProcAddr(String instance, String pName) long;
+}
 
 space {
     // 常用 VkResult 判定（>=0 为成功）
@@ -53,4 +53,4 @@ space {
     fn ERROR_OUT_OF_DATE_KHR() int { return -1000001004; }
     fn ERROR_INCOMPATIBLE_DRIVER() int { return -1000001001; }
     fn ERROR_NOT_READY() int { return -1000001005; }
-} (vk);
+} vk;

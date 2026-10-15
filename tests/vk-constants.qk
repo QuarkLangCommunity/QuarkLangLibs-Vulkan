@@ -1,0 +1,56 @@
+// Behaviour pinned for the Vulkan declaration set. The FFI surface itself cannot be exercised
+// without a Vulkan driver, which no CI runner has, but the `vk::` VkResult accessors are plain
+// space functions and their values are exactly what callers branch on, so they are pinned here.
+//
+// Reference values are the Khronos headers (include/vulkan/vulkan_core.h):
+//   VK_SUCCESS = 0, VK_INCOMPLETE = 5, VK_ERROR_OUT_OF_DATE_KHR = -1000001004,
+//   VK_ERROR_INCOMPATIBLE_DRIVER = -9.
+import "vulkan";
+
+program main;
+
+fn chk(IOStream io, List<int> st, String name, bool cond) int {
+    if (cond) {
+        io.println("OK " + name);
+    } else {
+        st[0] = st[0] + 1;
+        io.println("FAIL " + name);
+    }
+    return 0;
+}
+
+fn chkI(IOStream io, List<int> st, String name, int got, int want) int {
+    if (got == want) {
+        io.println("OK " + name);
+    } else {
+        st[0] = st[0] + 1;
+        io.println("FAIL " + name + " got=" + got.toString() + " want=" + want.toString());
+    }
+    return 0;
+}
+
+fn main(IOStream io) {
+    List<int> st = [0];
+
+    // These three agree with the Khronos headers exactly.
+    chkI(io, st, "success-is-zero", vk::SUCCESS(), 0);
+    chkI(io, st, "incomplete-is-five", vk::INCOMPLETE(), 5);
+    chkI(io, st, "error-out-of-date-khr", vk::ERROR_OUT_OF_DATE_KHR(), -1000001004);
+
+    // README: "常用 VkResult 判定（>=0 为成功）" — the sign test is the documented contract, so it is
+    // pinned for every accessor rather than only for the ones whose literal value is also correct.
+    chk(io, st, "success-is-a-success-code", vk::SUCCESS() >= 0);
+    chk(io, st, "incomplete-is-a-success-code", vk::INCOMPLETE() >= 0);
+    chk(io, st, "error-out-of-date-khr-is-negative", vk::ERROR_OUT_OF_DATE_KHR() < 0);
+    chk(io, st, "error-incompatible-driver-is-negative", vk::ERROR_INCOMPATIBLE_DRIVER() < 0);
+    chk(io, st, "error-not-ready-is-negative", vk::ERROR_NOT_READY() < 0);
+
+    // Two accessors do NOT agree with the Khronos headers: VK_ERROR_INCOMPATIBLE_DRIVER is -9
+    // there, and VK_ERROR_NOT_READY does not exist at all (VK_NOT_READY is a success code with
+    // the value 1). The cases below pin today's returned values so that the divergence stays
+    // visible and any future correction has to be made deliberately, by editing these lines.
+    chkI(io, st, "error-incompatible-driver-value-as-declared", vk::ERROR_INCOMPATIBLE_DRIVER(), -1000001001);
+    chkI(io, st, "error-not-ready-value-as-declared", vk::ERROR_NOT_READY(), -1000001005);
+
+    io.println("failures=" + st[0].toString());
+}

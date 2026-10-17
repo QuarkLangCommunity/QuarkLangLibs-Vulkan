@@ -2,9 +2,14 @@
 // without a Vulkan driver, which no CI runner has, but the `vk::` VkResult accessors are plain
 // space functions and their values are exactly what callers branch on, so they are pinned here.
 //
-// Reference values are the Khronos headers (include/vulkan/vulkan_core.h):
-//   VK_SUCCESS = 0, VK_INCOMPLETE = 5, VK_ERROR_OUT_OF_DATE_KHR = -1000001004,
-//   VK_ERROR_INCOMPATIBLE_DRIVER = -9.
+// Reference values are the Khronos headers (include/vulkan/vulkan_core.h, VK_HEADER_VERSION 365):
+//   VK_SUCCESS = 0, VK_NOT_READY = 1, VK_INCOMPLETE = 5,
+//   VK_ERROR_OUT_OF_DATE_KHR = -1000001004, VK_ERROR_INCOMPATIBLE_DRIVER = -9.
+//
+// Corrected here: ERROR_INCOMPATIBLE_DRIVER used to return -1000001001, which is not a Khronos
+// value, and now returns -9. ERROR_NOT_READY used to return -1000001005, but vulkan_core.h has
+// no VK_ERROR_NOT_READY at all: the real code is VK_NOT_READY = 1, a success code, exposed as
+// vk::NOT_READY().
 import "vulkan";
 
 program main;
@@ -32,25 +37,21 @@ fn chkI(IOStream io, List<int> st, String name, int got, int want) int {
 fn main(IOStream io) {
     List<int> st = [0];
 
-    // These three agree with the Khronos headers exactly.
+    // Exact values from the Khronos header.
     chkI(io, st, "success-is-zero", vk::SUCCESS(), 0);
+    chkI(io, st, "not-ready-is-one", vk::NOT_READY(), 1);
     chkI(io, st, "incomplete-is-five", vk::INCOMPLETE(), 5);
     chkI(io, st, "error-out-of-date-khr", vk::ERROR_OUT_OF_DATE_KHR(), -1000001004);
+    chkI(io, st, "error-incompatible-driver", vk::ERROR_INCOMPATIBLE_DRIVER(), -9);
 
-    // README: "常用 VkResult 判定（>=0 为成功）" — the sign test is the documented contract, so it is
-    // pinned for every accessor rather than only for the ones whose literal value is also correct.
+    // vulkan.qk documents the contract as "common VkResult predicates (>= 0 means success)". The
+    // sign test is that contract. VK_NOT_READY is a success code, so it must be non-negative like
+    // VK_SUCCESS and VK_INCOMPLETE; only the VK_ERROR_* values are negative.
     chk(io, st, "success-is-a-success-code", vk::SUCCESS() >= 0);
+    chk(io, st, "not-ready-is-a-success-code", vk::NOT_READY() >= 0);
     chk(io, st, "incomplete-is-a-success-code", vk::INCOMPLETE() >= 0);
     chk(io, st, "error-out-of-date-khr-is-negative", vk::ERROR_OUT_OF_DATE_KHR() < 0);
     chk(io, st, "error-incompatible-driver-is-negative", vk::ERROR_INCOMPATIBLE_DRIVER() < 0);
-    chk(io, st, "error-not-ready-is-negative", vk::ERROR_NOT_READY() < 0);
-
-    // Two accessors do NOT agree with the Khronos headers: VK_ERROR_INCOMPATIBLE_DRIVER is -9
-    // there, and VK_ERROR_NOT_READY does not exist at all (VK_NOT_READY is a success code with
-    // the value 1). The cases below pin today's returned values so that the divergence stays
-    // visible and any future correction has to be made deliberately, by editing these lines.
-    chkI(io, st, "error-incompatible-driver-value-as-declared", vk::ERROR_INCOMPATIBLE_DRIVER(), -1000001001);
-    chkI(io, st, "error-not-ready-value-as-declared", vk::ERROR_NOT_READY(), -1000001005);
 
     io.println("failures=" + st[0].toString());
 }

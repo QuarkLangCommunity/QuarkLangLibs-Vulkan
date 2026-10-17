@@ -47,10 +47,11 @@ library vulkan {
 }
 
 space {
-    // 常用 VkResult 判定（>=0 为成功）
+    // Common VkResult predicates (>= 0 means success).
+    // VK_NOT_READY is a success code; there is no VK_ERROR_NOT_READY in vulkan_core.h.
     fn SUCCESS() int { return 0; }
+    fn NOT_READY() int { return 1; }
     fn INCOMPLETE() int { return 5; }
     fn ERROR_OUT_OF_DATE_KHR() int { return -1000001004; }
-    fn ERROR_INCOMPATIBLE_DRIVER() int { return -1000001001; }
-    fn ERROR_NOT_READY() int { return -1000001005; }
+    fn ERROR_INCOMPATIBLE_DRIVER() int { return -9; }
 } vk;
